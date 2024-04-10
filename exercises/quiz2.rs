@@ -36,7 +36,7 @@ mod my_module {
         for (string, command) in input.iter() {
             match command {
                 Command::Uppercase => output.push(string.to_uppercase()),
-                Command::Trim => output.push(string.trim().to_owned()),
+                Command::Trim => output.push(string.trim().to_string()),
                 Command::Append(v) => {
                     let mut appended_string = string.to_owned();
                     for _ in 0..*v {
