@@ -39,16 +39,12 @@ where
     pub fn add(&mut self, value: T) {
         self.count += 1;
         self.items.push(value);
-        // self.heap_up(self.count);
-        let mut index = self.count;
-        while index > 0 {
+
+        let mut index = self.len();
+        while index > 1 && (self.comparator)(&self.items[index], &self.items[self.parent_idx(index)]) {
             let parent_idx = self.parent_idx(index);
-            if (self.comparator)(&self.items[index], &self.items[parent_idx]) {
-                self.items.swap(index, parent_idx);
-                index = parent_idx;
-            } else {
-                break;
-            }
+            self.items.swap(index, parent_idx);
+            index = parent_idx;
         }
     }
 
@@ -73,17 +69,11 @@ where
         let left_idx = self.left_child_idx(idx);
         let right_idx = self.right_child_idx(idx);
         
-        if self.children_present(left_idx) {
-            return idx;
+        if right_idx <= self.len() && (self.comparator)(&self.items[right_idx], &self.items[left_idx]) {
+            return right_idx;
         }
-
-        if right_idx > self.len() {
-            left_idx
-        } else if (self.comparator)(&self.items[left_idx], &self.items[right_idx]) {
-            left_idx
-        } else {
-            right_idx
-        }
+        left_idx
+        
     }
 }
 
@@ -109,9 +99,25 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        let res = self.items.get(1).cloned();
-        
-		// None
+        if self.len() == 0 {
+            return None;
+        }
+
+        let res = self.items.swap_remove(1);
+        self.count -= 1;
+
+        let mut idx = 1;
+        while self.children_present(idx) {
+            let smallest_child_idx = self.smallest_child_idx(idx);
+            if (self.comparator)(&self.items[smallest_child_idx], &self.items[idx]) {
+                self.items.swap(smallest_child_idx, idx);
+                idx = smallest_child_idx;
+            } else {
+                break;
+            }
+        }
+    
+		Some(res)
     }
 }
 
